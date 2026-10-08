@@ -16,7 +16,7 @@
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;background:var(--bg);color:var(--txt);font:16px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
 body{padding:env(safe-area-inset-top) 0 calc(76px + env(safe-area-inset-bottom))}
-main{padding:12px 16px 24px;max-width:640px;margin:0 auto}
+main{padding:12px 16px 90px;max-width:640px;margin:0 auto}
 h1{font-size:22px;margin:6px 0 2px}
 h2{font-size:17px;margin:18px 0 8px}
 .sub{color:var(--mut);font-size:14px}
@@ -59,6 +59,16 @@ nav button.on{color:var(--acc)}
 .list{padding-left:18px;margin:6px 0 0}
 canvas{width:100%;height:200px;background:var(--card2);border-radius:10px}
 .hist{display:flex;justify-content:space-between;font-size:14px;padding:8px 0;border-bottom:1px solid var(--line)}
+.rth{display:flex;justify-content:space-between;align-items:center;width:100%;background:none;border:0;color:var(--txt);padding:2px 0;font-size:16px;text-align:left}
+.rth .ok{color:var(--ok)}
+.rti{display:flex;gap:10px;align-items:center;width:100%;background:var(--card2);border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:10px;margin:6px 0;font-size:15px;text-align:left}
+.rti i{flex:none;width:24px;height:24px;border-radius:50%;border:2px solid var(--line);font-style:normal;font-size:13px;display:flex;align-items:center;justify-content:center;color:transparent}
+.rti.on{opacity:.6}.rti.on i{background:var(--ok);border-color:var(--ok);color:#06210f}.rti.on span{text-decoration:line-through}
+.info{background:none;border:0;color:var(--acc);font-size:18px;padding:0 4px;vertical-align:-1px}
+.desc{background:var(--card2);border-radius:10px;padding:10px 12px;margin:8px 0;font-size:14px;color:#d6dbe1}
+.desc p{margin:6px 0}.desc ul{margin:6px 0;padding-left:18px}.desc li{margin:2px 0}
+.desc .mus{color:var(--acc);font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.03em}
+.desc .err{color:#ffb4a0}.desc a{color:var(--acc);text-decoration:none;font-weight:600;display:inline-block;margin-top:4px}
 label{display:block;color:var(--mut);font-size:13px;margin:10px 0 4px}
 </style>
 </head>
@@ -85,6 +95,38 @@ const EX={
  ytw:['Y-T-W en banco inclinado',1,45], hip_thrust:['Hip thrust',1,120], remo_pecho:['Remo con pecho apoyado',1,75],
  press_incl:['Press inclinado mancuernas',1,90], deadbug:['Dead bug',0,30]
 };
+/* Descripciones: m = músculos, c = cómo se hace, k = claves, x = error típico */
+const DESC={
+ goblet:{m:'Cuádriceps, glúteo, core',c:'De pie, pies algo más abiertos que la cadera. Sujeta una mancuerna vertical pegada al pecho. Baja sentándote entre los talones hasta que los codos rocen las rodillas y sube empujando el suelo.',k:['Pecho alto y espalda neutra','Rodillas siguen la dirección de los pies','Talones apoyados todo el recorrido'],x:'Dejar que las rodillas se cierren hacia dentro al subir.'},
+ remo_mb:{m:'Dorsal, romboides, deltoides posterior',c:'Mano y rodilla del mismo lado apoyadas en un banco, espalda paralela al suelo. Tira de la mancuerna hacia la cadera llevando el codo atrás y bájala controlada hasta estirar el brazo.',k:['Codo pegado al cuerpo, hacia la cadera','Junta la escápula al final','Sin girar el tronco'],x:'Tirar con el bíceps y dar tirones con el cuerpo.'},
+ press_mil_mb:{m:'Deltoides, tríceps',c:'Sentado en banco con respaldo vertical. Mancuernas a la altura de los hombros, palmas al frente. Empuja hacia arriba hasta casi extender los codos y baja controlado.',k:['Abdomen apretado, lumbar apoyada','Codos ligeramente por delante del cuerpo','Bajar hasta la altura de las orejas'],x:'Arquear la zona lumbar para mover más peso.'},
+ puente:{m:'Glúteo, isquiotibiales',c:'Tumbado boca arriba, rodillas dobladas y pies apoyados cerca de los glúteos. Eleva la cadera apretando glúteos hasta alinear rodillas-cadera-hombros. Pausa 1 s arriba y baja.',k:['Empuja con los talones','Pelvis en retroversión (sin arquear)','Pausa arriba'],x:'Subir de más arqueando la lumbar en lugar de apretar glúteo.'},
+ facepull:{m:'Deltoides posterior, manguito rotador, trapecio medio',c:'Polea alta con cuerda. Agarre con pulgares hacia ti. Tira hacia la cara separando las manos, terminando con los codos altos y las manos a la altura de las orejas.',k:['Codos altos, a la altura de los hombros','Rota hacia fuera al final (puños atrás)','Peso ligero, movimiento controlado'],x:'Usar demasiado peso y tirar con la espalda baja.'},
+ plancha:{m:'Core (recto y transverso abdominal)',c:'Apoyado en antebrazos y puntas de los pies, cuerpo recto de cabeza a talones. Mantén la posición el tiempo indicado.',k:['Aprieta glúteos y abdomen','Codos bajo los hombros','Respira, no bloquees'],x:'Dejar caer la cadera o subirla en pico.'},
+ pmr_mb:{m:'Isquiotibiales, glúteo, erectores',c:'De pie con una mancuerna en cada mano. Rodillas ligeramente flexionadas y fijas. Lleva la cadera atrás deslizando las mancuernas por los muslos hasta notar tensión en isquios y vuelve empujando la cadera al frente.',k:['Movimiento de bisagra: cadera atrás','Espalda neutra todo el recorrido','Mancuernas pegadas a las piernas'],x:'Redondear la espalda o convertirlo en una sentadilla.'},
+ jalon:{m:'Dorsal ancho, bíceps',c:'Sentado en máquina con muslos bloqueados. Agarre algo más ancho que hombros. Tira de la barra hacia la parte alta del pecho llevando los codos abajo y atrás. Sube controlado.',k:['Saca pecho e inclina ligeramente el tronco','Baja primero las escápulas','Controla la subida'],x:'Balancearse hacia atrás o bajar la barra tras la nuca.'},
+ press_banca_mb:{m:'Pectoral, tríceps, deltoides anterior',c:'Tumbado en banco plano, pies firmes. Mancuernas sobre el pecho. Bájalas a los lados del pecho con codos a ~45° y empuja hasta arriba.',k:['Escápulas juntas y hacia abajo','Codos a 45°, no abiertos a 90°','Bajar hasta notar estiramiento'],x:'Abrir los codos en cruz, que carga el hombro.'},
+ laterales:{m:'Deltoides lateral',c:'De pie, mancuernas a los lados. Eleva los brazos lateralmente con codos ligeramente flexionados hasta la altura de los hombros. Baja lento.',k:['Lidera con los codos, no con las manos','Hasta la altura del hombro, no más','Bajada en 2–3 s'],x:'Usar impulso y encoger el trapecio.'},
+ talones:{m:'Gemelo, sóleo (clave para correr)',c:'De pie con la parte delantera del pie en un escalón o disco. Baja los talones hasta estirar y sube lo más alto posible. Pausa arriba.',k:['Rango completo: estira abajo','Pausa 1 s arriba','Rodillas casi estiradas'],x:'Rebotar abajo y hacer medio recorrido.'},
+ pallof:{m:'Core antirrotación (oblicuos, transverso)',c:'De lado a una polea o banda a la altura del pecho. Sujeta el agarre con ambas manos junto al pecho y estira los brazos al frente resistiendo el giro. Vuelve y repite; luego el otro lado.',k:['Cadera y hombros mirando al frente','Pies a la anchura de la cadera','Movimiento lento'],x:'Dejar que el cable te gire el tronco.'},
+ zancada_inv:{m:'Cuádriceps, glúteo, estabilidad',c:'De pie, da un paso largo hacia atrás y baja hasta que la rodilla trasera casi toque el suelo. Vuelve empujando con el pie delantero.',k:['Tronco recto','Peso en el talón delantero','Rodilla delantera alineada con el pie'],x:'Paso demasiado corto, que sobrecarga la rodilla.'},
+ remo_polea:{m:'Dorsal, romboides, trapecio medio',c:'Sentado frente a la polea baja, pies apoyados y rodillas algo flexionadas. Tira del agarre hacia el abdomen juntando escápulas y vuelve estirando los brazos sin perder la postura.',k:['Tronco fijo y erguido','Codos pegados al cuerpo','Junta escápulas al final'],x:'Balancear el tronco adelante y atrás.'},
+ arnold:{m:'Deltoides (las tres cabezas), tríceps',c:'Sentado, mancuernas frente a la cara con palmas hacia ti. Al empujar hacia arriba rota las muñecas para terminar con palmas al frente. Invierte el giro al bajar.',k:['Rotación fluida durante el recorrido','Abdomen firme','Peso moderado'],x:'Hacer el giro arriba de golpe en vez de durante el movimiento.'},
+ stepup:{m:'Cuádriceps, glúteo, equilibrio',c:'Frente a un cajón a la altura de la rodilla. Apoya un pie entero y sube empujando con esa pierna hasta quedarte de pie. Baja controlado con la misma pierna.',k:['La pierna de arriba hace el trabajo','Sin impulsarte con el pie de abajo','Rodilla alineada con el pie'],x:'Saltar con la pierna de abajo.'},
+ rot_ext:{m:'Manguito rotador (infraespinoso, redondo menor)',c:'De pie, codo pegado al costado a 90° (una toalla entre codo y cuerpo ayuda). Con banda o polea a la altura del codo, rota el antebrazo hacia fuera y vuelve lento.',k:['Codo fijo pegado al cuerpo','Peso muy ligero','Movimiento lento y controlado'],x:'Separar el codo del cuerpo o usar demasiada carga.'},
+ birddog:{m:'Core, glúteo, estabilizadores de la espalda',c:'En cuadrupedia, manos bajo hombros y rodillas bajo cadera. Extiende a la vez brazo y pierna contrarios hasta alinearlos con el tronco. Pausa 2 s y vuelve.',k:['Espalda plana (como una mesa)','Cadera sin girar','Lento, con pausa'],x:'Arquear la lumbar al subir la pierna.'},
+ sentadilla:{m:'Cuádriceps, glúteo, aductores, core',c:'Barra apoyada sobre los trapecios. Pies a la anchura de los hombros. Inspira, aprieta el abdomen y baja llevando cadera atrás y abajo hasta al menos la paralela. Sube empujando el suelo.',k:['Respira y bloquea el core antes de bajar','Rodillas en la dirección de los pies','Mirada al frente, espalda neutra'],x:'Levantar los talones o redondear la espalda abajo.'},
+ pmr:{m:'Isquiotibiales, glúteo, erectores',c:'De pie con la barra en las manos. Rodillas ligeramente flexionadas. Lleva la cadera atrás deslizando la barra pegada a los muslos hasta media tibia o hasta notar tensión en isquios. Vuelve empujando la cadera al frente.',k:['Barra siempre pegada a las piernas','Espalda neutra, hombros atrás','La cadera manda, no la espalda'],x:'Redondear la espalda para bajar más.'},
+ bulgara:{m:'Cuádriceps, glúteo, estabilidad (muy útil para correr)',c:'De espaldas a un banco, apoya el empeine del pie trasero en él. Baja flexionando la rodilla delantera hasta que el muslo quede casi paralelo al suelo y sube.',k:['Pie delantero lo bastante adelantado','Tronco algo inclinado = más glúteo','Baja controlado'],x:'Pie delantero demasiado cerca del banco.'},
+ plancha_lat:{m:'Oblicuos, glúteo medio',c:'De lado, apoyado en un antebrazo (codo bajo el hombro) y el lateral del pie. Eleva la cadera hasta alinear el cuerpo y mantén.',k:['Cuerpo en línea recta','Cadera alta, sin hundirla','Hombro lejos de la oreja'],x:'Dejar caer la cadera.'},
+ press_mil:{m:'Deltoides, tríceps, core',c:'De pie, barra apoyada en la parte alta del pecho, agarre algo más ancho que hombros. Empuja la barra en vertical apartando la cabeza y métela bajo la barra al final.',k:['Glúteos y abdomen apretados','Antebrazos verticales','La barra sube en línea recta'],x:'Arquear la espalda hacia atrás.'},
+ dominada:{m:'Dorsal ancho, bíceps, core',c:'Colgado de la barra (con banda o máquina asistida si hace falta). Tira llevando el pecho hacia la barra hasta pasar la barbilla. Baja controlado hasta estirar los brazos. Si no tienes asistencia, haz jalón al pecho.',k:['Baja primero las escápulas','Sin balanceos','Rango completo'],x:'Medias repeticiones sin estirar abajo.'},
+ ytw:{m:'Trapecio medio e inferior, deltoides posterior',c:'Boca abajo en banco inclinado (~30°), brazos colgando. Eleva los brazos formando una Y (arriba), luego una T (lateral) y luego una W (codos atrás). Cada letra cuenta como una repetición.',k:['Pulgares hacia arriba','Junta escápulas','Muy poco peso (0–2 kg)'],x:'Usar peso y encoger los hombros.'},
+ hip_thrust:{m:'Glúteo, isquiotibiales',c:'Espalda alta apoyada en un banco, barra sobre la cadera (con protector). Pies apoyados a la anchura de las caderas. Eleva la cadera hasta alinear el tronco con los muslos, pausa y baja.',k:['Barbilla al pecho, mirada al frente','Tibias verticales arriba','Aprieta glúteos, sin arquear la lumbar'],x:'Hiperextender la zona lumbar arriba.'},
+ remo_pecho:{m:'Dorsal, romboides, deltoides posterior',c:'Pecho apoyado en un banco inclinado o en máquina. Con una mancuerna en cada mano, tira llevando los codos atrás y junta escápulas. Baja controlado.',k:['Pecho pegado al apoyo','Junta escápulas arriba','Sin tirones'],x:'Despegar el pecho del banco para usar impulso.'},
+ press_incl:{m:'Pectoral superior, deltoides anterior, tríceps',c:'Banco a 30°. Mancuernas a la altura del pecho alto. Empuja hacia arriba y ligeramente hacia dentro; baja controlado.',k:['Escápulas juntas y hacia abajo','Codos a ~45°','Inclinación baja (30°)'],x:'Banco demasiado inclinado, que lo convierte en press de hombro.'},
+ deadbug:{m:'Core profundo (transverso), control lumbopélvico',c:'Boca arriba, brazos al techo y rodillas a 90° sobre la cadera. Extiende a la vez brazo y pierna contrarios hasta casi tocar el suelo y vuelve. Alterna.',k:['Lumbar pegada al suelo en todo momento','Exhala al extender','Lento'],x:'Despegar la lumbar del suelo al extender.'}
+};
 const DAYS=[{k:'lun',n:'Lunes',o:0},{k:'mar',n:'Martes',o:1},{k:'mie',n:'Miércoles',o:2},{k:'jue',n:'Jueves',o:3}];
 
 /* ===== Plan ===== */
@@ -108,6 +150,31 @@ const BWNOTE=['Semana 1 del bloque · RIR 3: acaba cada serie con ~3 repeticione
 const RUN={fb:['25–30 min de rodaje suave (debes poder hablar).','25–30 min suave + 4 progresivos de 20 s.'],
  blk:['30–35 min suave.','35–40 min suave + 4 progresivos de 20 s.','10 min suave + 5 × 3 min a ritmo vivo (2 min suave entre series) + 5 min suave.','25–30 min muy suave (descarga).']};
 
+/* ===== Calentamiento (wu) y estiramientos (cd) — [texto, segundos para temporizador] ===== */
+const RT={
+ wu:{
+  leg:[['Cardio suave: bici o elíptica · 5 min',0],['Balanceo de pierna adelante-atrás y lateral · 10/lado',0],['Movilidad de tobillo: rodilla a la pared · 10/lado',0],['Sentadilla con peso corporal + 2 s de pausa abajo · 10',0],['Puente de glúteo · 10',0],['2 series de aproximación del primer ejercicio (50% y 75%)',0]],
+  up:[['Cardio suave: remo o elíptica · 5 min',0],['Círculos de brazos · 10 en cada sentido',0],['Gato-camello · 8',0],['Dislocaciones con banda o pica · 10',0],['Pull-apart con banda · 15',0],['Rotación externa con banda ligera · 10/lado',0],['2 series de aproximación del primer ejercicio (50% y 75%)',0]],
+  fb:[['Cardio suave: bici, remo o elíptica · 5 min',0],['Gato-camello · 8',0],['Inchworm (gusano) · 5',0],['Balanceo de pierna adelante-atrás · 10/lado',0],['Sentadilla con peso corporal · 10',0],['Pull-apart con banda · 15',0],['1–2 series ligeras del primer ejercicio',0]],
+  run:[['Caminar rápido o trote muy suave · 5 min',0],['Balanceo de pierna adelante-atrás y lateral · 10/lado',0],['Zancada con giro de tronco · 5/lado',0],['Skipping bajo · 2 × 20 m',0],['Talones al glúteo · 2 × 20 m',0]]
+ },
+ cd:{
+  leg:[['Cuádriceps de pie (talón al glúteo) · 30 s/lado',30],['Isquios: pierna estirada sobre banco · 30 s/lado',30],['Flexor de cadera en zancada arrodillada · 30 s/lado',30],['Gemelo contra la pared · 30 s/lado',30],['Glúteo en figura 4 (tumbado) · 30 s/lado',30]],
+  up:[['Pectoral en marco de puerta · 30 s/lado',30],['Dorsal: manos en banco, cadera atrás · 30 s',30],['Hombro posterior: brazo cruzado al pecho · 30 s/lado',30],['Tríceps por encima de la cabeza · 30 s/lado',30],['Postura del niño · 45 s',45]],
+  fb:[['Postura del niño · 45 s',45],['Flexor de cadera en zancada arrodillada · 30 s/lado',30],['Isquios: pierna estirada sobre banco · 30 s/lado',30],['Pectoral en marco de puerta · 30 s/lado',30],['Glúteo en figura 4 (tumbado) · 30 s/lado',30]],
+  run:[['Gemelo contra la pared (rodilla estirada) · 30 s/lado',30],['Sóleo contra la pared (rodilla flexionada) · 30 s/lado',30],['Cuádriceps de pie · 30 s/lado',30],['Isquios: pie en escalón, cadera atrás · 30 s/lado',30],['Flexor de cadera en zancada · 30 s/lado',30]]
+ }
+};
+const RTT={wu:['🔥 Calentamiento','~8–10 min'],cd:['🧘 Estiramientos','~5 min · toca un estiramiento para iniciar el temporizador']};
+const rtOpen={};
+function routine(kind,type,l){
+ const arr=RT[kind][type];if(!arr)return'';
+ const st=(l&&l[kind])||{}, n=arr.filter((_,i)=>st[i]).length, k=key(sel.w,sel.d)+kind;
+ const show=rtOpen[k]??(kind==='wu'&&n<arr.length);
+ return `<div class="card rt"><button class="rth" data-rt="${k}"><b>${RTT[kind][0]} <span class="${n===arr.length?'ok':'sub'}">${n}/${arr.length}</span></b><span class="sub">${show?'▴':'▾'}</span></button>
+ <div class="rtb" ${show?'':'hidden'}><div class="sub" style="margin:2px 0 6px">${RTT[kind][1]}</div>${arr.map(([t,s],i)=>`<button class="rti ${st[i]?'on':''}" data-rti="${kind}" data-i="${i}" data-s="${s}"><i>✓</i><span>${t}</span></button>`).join('')}</div></div>`;
+}
+
 function phase(w){
  if(w<=2) return {fb:true,label:'Readaptación · full body',bw:w};
  const b=Math.floor((w-3)/4)+1, bw=(w-3)%4+1, type=b%2?'base':'fuerza';
@@ -117,15 +184,15 @@ function session(w,d){
  const p=phase(w);
  if(d==='mie'){
   const r=p.fb?RUN.fb[w-1]:RUN.blk[p.bw-1];
-  return {run:true,t:'Carrera',desc:r,p};
+  return {run:true,t:'Carrera',desc:r,p,rt:'run'};
  }
  if(p.fb){
   const s=FB[d];
-  return {t:s.t,p,note:w===1?'Cargas cómodas: prioriza técnica y rango de movimiento. Calienta 8–10 min (movilidad de hombro y cadera).':'Sube un poco la carga donde la semana pasada te sobró margen.',
+  return {t:s.t,p,rt:'fb',note:w===1?'Cargas cómodas: prioriza técnica y rango de movimiento.':'Sube un poco la carga donde la semana pasada te sobró margen.',
    items:s.items.map(([id,sets,r])=>mk(id,sets,r))};
  }
  const s=BLK[d], dl=p.bw===4;
- return {t:s.t,p,note:BWNOTE[p.bw-1]+' Calienta 8–10 min + 2 series de aproximación en los principales.',
+ return {t:s.t,p,rt:{lun:'leg',mar:'up',jue:'fb'}[d],note:BWNOTE[p.bw-1],
   items:s.items.map(it=>{
    const [id,k]=it;
    if(k==='m'){const [sets,r]=MAIN[p.type][p.bw-1];return mk(id,sets,r,true)}
@@ -189,29 +256,41 @@ function vHoy(){
  if(s.run){
   const r=l||{};
   const pace=(r.km>0&&r.min>0)?(()=>{const p=r.min/r.km,m=Math.floor(p),sec=Math.round((p-m)*60);return m+':'+String(sec).padStart(2,'0')+' min/km'})():'—';
-  h+=`<div class="note">${s.desc}</div><div class="card">
+  h+=`<div class="note">${s.desc}</div>${routine('wu',s.rt,l)}<div class="card">
   <div class="row"><div><label>Distancia (km)</label><input inputmode="decimal" data-run="km" value="${esc(r.km)}"></div><div><label>Tiempo (min)</label><input inputmode="decimal" data-run="min" value="${esc(r.min)}"></div></div>
   <div class="row"><div><label>Esfuerzo (RPE 1–10)</label><input inputmode="numeric" data-run="rpe" value="${esc(r.rpe)}"></div><div><label>Ritmo</label><input disabled value="${pace}"></div></div>
-  <label>Notas</label><textarea data-note>${esc(r.note)}</textarea></div>`;
+  <label>Notas</label><textarea data-note>${esc(r.note)}</textarea></div>${routine('cd',s.rt,l)}`;
  }else{
-  h+=`<div class="note">${s.note}</div>`;
+  h+=`<div class="note">${s.note}</div>${routine('wu',s.rt,l)}`;
   for(const e of s.items){
    const sets=(l&&l.sets[e.id])||[], last=lastFor(e.id,k), n=Math.max(e.s,sets.length);
    const lw=last?topW(last.sets):null;
    const lastTxt=last?`Última vez: ${last.sets.map(x=>(x.w?x.w+'×':'')+(x.r||'?')).join(' · ')}`:'Sin registros previos';
-   h+=`<div class="card"><div class="exh"><b>${e.name}</b><span class="tgt">${e.s} × ${e.r}</span></div><div class="last">${lastTxt}</div>`;
+   h+=`<div class="card"><div class="exh"><b>${e.name} <button class="info" data-info="${e.id}" aria-label="Cómo se hace">ⓘ</button></b><span class="tgt">${e.s} × ${e.r}</span></div>${descHTML(e.id,open.has(e.id))}<div class="last">${lastTxt}</div>`;
    for(let i=0;i<n;i++){
     const x=sets[i]||{};
     h+=`<div class="set ${e.w?'':'nw'}"><span class="n">${i+1}</span>`+
      (e.w?`<div class="fld"><input inputmode="decimal" placeholder="${lw??''}" data-ex="${e.id}" data-i="${i}" data-f="w" value="${esc(x.w)}"><span>kg</span></div>`:'')+
-     `<div class="fld"><input inputmode="numeric" placeholder="${parseInt(e.r)||''}" data-ex="${e.id}" data-i="${i}" data-f="r" value="${esc(x.r)}"><span>${/s/.test(e.r)&&!/lado|c\/u/.test(e.r)?'s':'reps'}</span></div>`+
+     `<div class="fld"><input inputmode="numeric" placeholder="${parseInt(e.r)||''}" data-ex="${e.id}" data-i="${i}" data-f="r" value="${esc(x.r)}"><span>${/\d\s*s(\b|\/)/.test(e.r)?'s':'reps'}</span></div>`+
      `<button class="chk ${x.d?'on':''}" data-chk="${e.id}" data-i="${i}" data-rest="${e.rest}" data-lw="${lw??''}" data-tr="${parseInt(e.r)||''}">✓</button></div>`;
    }
    h+=`<button class="mini" data-add="${e.id}" data-n="${n}">+ añadir serie</button></div>`;
   }
-  h+=`<label>Notas de la sesión</label><textarea data-note>${esc(l&&l.note)}</textarea>`;
+  h+=`${routine('cd',s.rt,l)}<label>Notas de la sesión</label><textarea data-note>${esc(l&&l.note)}</textarea>`;
  }
  h+=`<button class="btn" data-fin>${l&&l.fin?'Sesión completada ✓':'Finalizar sesión'}</button>`;
+ app.innerHTML=h;
+}
+const open=new Set();
+function descHTML(id,show){
+ const d=DESC[id];if(!d)return'';
+ const q=encodeURIComponent(EX[id][0]+' técnica');
+ return `<div class="desc" id="d-${id}" ${show?'':'hidden'}><div class="mus">${d.m}</div><p>${d.c}</p><ul>${d.k.map(x=>`<li>${x}</li>`).join('')}</ul><p class="err"><b>Evita:</b> ${d.x}</p><a href="https://www.youtube.com/results?search_query=${q}" target="_blank" rel="noopener">▶ Ver vídeos de técnica</a></div>`;
+}
+function vEx(){
+ const ids=Object.keys(EX).sort((a,b)=>EX[a][0].localeCompare(EX[b][0],'es'));
+ let h=`<button class="mini" data-back>‹ Volver al plan</button><h1>Ejercicios</h1><p class="sub">Toca un ejercicio para ver cómo se hace.</p>`;
+ for(const id of ids)h+=`<div class="card"><div class="exh"><b>${EX[id][0]} <button class="info" data-info="${id}">ⓘ</button></b></div>${descHTML(id,open.has(id))}</div>`;
  app.innerHTML=h;
 }
 function vPlan(){
@@ -222,7 +301,7 @@ function vPlan(){
   h+=`<div class="card day" data-go="${planW}|${D.k}"><div class="exh"><b>${D.n} · ${s.t}</b><small>${fmt(dateFor(planW,D.k))}</small></div>${l&&l.fin?'<div class="done">✓ Completada</div>':''}
   <ul class="list">${s.run?`<li>${s.desc}</li>`:s.items.map(e=>`<li>${e.name} — ${e.s}×${e.r}</li>`).join('')}</ul></div>`;
  }
- h+=`<p class="sub">Semanas 1–2: readaptación full body. Después, bloques de 4 semanas alternando Base (más volumen) y Fuerza (menos reps, más carga). La semana 4 de cada bloque es de descarga.</p>`;
+ h+=`<button class="btn sec" data-exlist>📖 Ver todos los ejercicios</button><p class="sub">Semanas 1–2: readaptación full body. Después, bloques de 4 semanas alternando Base (más volumen) y Fuerza (menos reps, más carga). La semana 4 de cada bloque es de descarga.</p>`;
  app.innerHTML=h;
 }
 let histEx=null;
@@ -272,7 +351,7 @@ function vAjustes(){
  <button class="btn sec" data-imp>Importar texto pegado</button>
  <h2>Zona peligrosa</h2>
  <button class="btn sec" data-reset style="color:#ff6b6b">Borrar todos los datos</button>
- <p class="sub" style="margin-top:16px">Versión 1.0</p>`;
+ <p class="sub" style="margin-top:16px">Versión 1.2</p>`;
 }
 
 /* ===== Eventos ===== */
@@ -291,7 +370,20 @@ app.addEventListener('change',e=>{
  if('impf' in t.dataset&&t.files[0]){t.files[0].text().then(doImport)}
 });
 app.addEventListener('click',e=>{
- const b=e.target.closest('[data-chk],[data-add],[data-nav],[data-pw],[data-go],[data-fin],[data-exp],[data-imp],[data-reset]');if(!b)return;
+ const b=e.target.closest('[data-rt],[data-rti],[data-info],[data-exlist],[data-back],[data-chk],[data-add],[data-nav],[data-pw],[data-go],[data-fin],[data-exp],[data-imp],[data-reset]');if(!b)return;
+ if(b.dataset.rt){const body=b.nextElementSibling;body.hidden=!body.hidden;rtOpen[b.dataset.rt]=!body.hidden;b.lastElementChild.textContent=body.hidden?'▾':'▴';return}
+ if(b.dataset.rti){
+  unlockAudio();
+  const kind=b.dataset.rti,i=+b.dataset.i,l=getLog(key(sel.w,sel.d),true),st=l[kind]||(l[kind]={});
+  st[i]=!st[i];b.classList.toggle('on',st[i]);save();
+  const card=b.closest('.rt'),tot=card.querySelectorAll('.rti').length,n=card.querySelectorAll('.rti.on').length,c=card.querySelector('.rth b span');
+  c.textContent=n+'/'+tot;c.className=n===tot?'ok':'sub';
+  if(st[i]&&+b.dataset.s)startTimer(+b.dataset.s);
+  return;
+ }
+ if(b.dataset.info){e.stopPropagation();const id=b.dataset.info,el=b.closest('.card').querySelector('.desc');if(!el)return;el.hidden=!el.hidden;el.hidden?open.delete(id):open.add(id);return}
+ if('exlist' in b.dataset){vEx();window.scrollTo(0,0);return}
+ if('back' in b.dataset){vPlan();window.scrollTo(0,0);return}
  const k=key(sel.w,sel.d);
  if(b.dataset.chk){
   unlockAudio();
