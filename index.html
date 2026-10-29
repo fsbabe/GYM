@@ -39,6 +39,16 @@ textarea{font-size:14px;min-height:70px}
 .chk{width:48px;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1;padding:0}
 .chk.two{width:46px}.chk small{font-size:10px;margin-top:3px;opacity:.85}
 .chk.run{background:var(--acc);color:#1a0d02;border-color:var(--acc)}
+.rate{border-top:1px solid var(--line);margin-top:8px;padding-top:8px}
+.rbtns{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:6px}
+.rbtns button{background:var(--card2);border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:7px 2px;display:flex;flex-direction:column;align-items:center;gap:2px}
+.rbtns b{font-size:13px}.rbtns small{font-size:11px;color:var(--mut)}
+.rbtns button.on{background:var(--acc);border-color:var(--acc);color:#1a0d02}.rbtns button.on small{color:#1a0d02}
+.hint{background:#2a2117;border-radius:8px;padding:6px 10px;font-size:13px;margin:0 0 8px;color:#f3d9c4}
+.var{display:flex;align-items:center;gap:8px;margin:8px 0 6px}
+.var select{flex:1;min-width:0;font-size:15px;padding:8px 10px;-webkit-appearance:none;appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--mut) 50%),linear-gradient(135deg,var(--mut) 50%,transparent 50%);background-position:calc(100% - 16px) 50%,calc(100% - 11px) 50%;background-size:5px 5px;background-repeat:no-repeat;padding-right:28px}
+.pin{background:var(--card2);border:1px solid var(--line);border-radius:10px;color:var(--mut);font-size:12px;padding:8px;white-space:nowrap}
+.pin.on{color:var(--acc);border-color:var(--acc)}
 .setbtns{display:flex;justify-content:space-between}
 .mini:disabled{opacity:.35}
 #timer.work{background:var(--ok)}
@@ -172,6 +182,73 @@ const ALT={
  ytw:['Pájaros en máquina (contractor inverso)','Sentado mirando al respaldo, agarres a la altura de los hombros. Abre los brazos hacia atrás con los codos casi estirados juntando escápulas. Vuelve lento.',['Peso ligero','Hombros lejos de las orejas']]
 };
 for(const [id,[n,c,k]] of Object.entries(ALT)){EX[id+'_maq']=[n,1,EX[id][2]];DESC[id+'_maq']={m:DESC[id].m,c,k,x:null}}
+/* Ejercicios adicionales para sustituciones: [nombre, con peso, categoría de subida, descanso, músculos, cómo, claves] */
+const NEWX={
+ smith_sq:['Sentadilla en multipower (Smith)',1,'L',120,'Cuádriceps, glúteo','Barra guiada sobre los trapecios, pies ligeramente adelantados. Baja hasta la paralela y sube empujando el suelo.',['Pies algo por delante de la barra','Espalda neutra']],
+ remo_polea1:['Remo a una mano en polea',1,'U',60,'Dorsal, romboides','Polea a media altura, agarre de una mano. Tira llevando el codo atrás y pegado al cuerpo; vuelve estirando el brazo.',['Tronco fijo','Junta la escápula al final']],
+ remo_barra:['Remo con barra',1,'U',90,'Dorsal, romboides, erectores','Tronco inclinado ~45° con la espalda neutra y rodillas flexionadas. Tira de la barra hacia el ombligo y bájala controlada.',['Espalda neutra todo el rato','Sin impulso con las piernas']],
+ smith_press:['Press militar en multipower',1,'U',90,'Deltoides, tríceps','Sentado en banco vertical bajo la barra guiada. Baja hasta la barbilla y empuja hasta casi extender los codos.',['Abdomen firme','Barra justo delante de la cara']],
+ landmine:['Press landmine',1,'U',75,'Deltoides anterior, pectoral alto, serrato','Extremo de la barra anclado en una esquina. Sujeta el otro extremo a la altura del hombro y empuja hacia arriba y al frente, de pie o de rodillas.',['Costillas abajo','Muy amable con el hombro']],
+ puente_barra:['Puente de glúteo con barra',1,'L',90,'Glúteo, isquiotibiales','Tumbado en el suelo con la barra sobre la cadera (con protector). Eleva la cadera apretando glúteos, pausa y baja.',['Empuja con los talones','Sin arquear la lumbar']],
+ puente_1p:['Puente de glúteo a una pierna',0,null,45,'Glúteo, estabilidad de cadera','Como el puente normal pero con una pierna estirada en el aire. Eleva la cadera sin que se incline hacia un lado.',['Cadera nivelada','Pausa arriba']],
+ fp_banda:['Face pull con banda',0,null,45,'Deltoides posterior, manguito rotador','Banda anclada a la altura de la cara. Tira hacia la cara separando las manos y llevando los codos altos.',['Codos altos','Rota hacia fuera al final']],
+ pajaros_mb:['Pájaros con mancuernas',1,'S',60,'Deltoides posterior, trapecio medio','Tronco inclinado casi paralelo al suelo (o pecho apoyado en banco inclinado). Abre los brazos lateralmente con codos ligeramente flexionados.',['Peso ligero','Sin encoger los hombros']],
+ hollow:['Hollow hold',0,null,45,'Core (recto abdominal)','Tumbado boca arriba, lumbar pegada al suelo. Eleva hombros y piernas estiradas formando una “banana” y mantén. Dobla rodillas para hacerlo más fácil.',['Lumbar pegada al suelo','Respira sin soltar']],
+ plancha_fitball:['Plancha sobre fitball',0,null,45,'Core','Antebrazos apoyados en un fitball y cuerpo recto sobre las puntas de los pies. Mantén sin que la pelota se mueva.',['Glúteos apretados','Cadera alineada']],
+ plancha_toques:['Plancha con toques de hombro',0,null,30,'Core antirrotación','En plancha alta (manos), toca el hombro contrario alternando manos sin que la cadera se balancee.',['Pies algo abiertos','Cadera quieta']],
+ pmr_1p:['Peso muerto rumano a una pierna',1,'D',75,'Isquiotibiales, glúteo, equilibrio','De pie sobre una pierna con una mancuerna en la mano contraria. Inclina el tronco llevando la pierna libre atrás hasta notar tensión en isquios y vuelve.',['Cadera nivelada','Espalda neutra']],
+ curl_fem:['Curl femoral en máquina',1,'U',75,'Isquiotibiales','Tumbado o sentado en la máquina, rodilla alineada con el eje. Flexiona las rodillas llevando el rodillo hacia los glúteos y vuelve lento.',['Cadera pegada al banco','Bajada en 2–3 s']],
+ jalon_neutro:['Jalón con agarre neutro',1,'U',90,'Dorsal, bíceps','Jalón con agarre de palmas enfrentadas (triángulo o barra neutra). Tira hacia la parte alta del pecho llevando los codos abajo.',['Pecho alto','Sin balanceo']],
+ pullover_polea:['Pullover en polea alta',1,'S',60,'Dorsal ancho','De pie frente a la polea alta con cuerda o barra. Brazos casi estirados, lleva el agarre hacia los muslos en arco y vuelve.',['Codos casi estirados','Tronco ligeramente inclinado']],
+ banca_barra:['Press banca con barra',1,'U',120,'Pectoral, tríceps, deltoides anterior','Tumbado con escápulas juntas. Baja la barra a la parte baja del pecho y empuja hasta extender los brazos.',['Pies firmes en el suelo','Codos a ~45°']],
+ flexiones:['Flexiones',0,null,75,'Pectoral, tríceps, core','Manos algo más abiertas que los hombros, cuerpo recto. Baja hasta casi tocar el suelo con el pecho y empuja.',['Cuerpo en línea recta','Codos a ~45°']],
+ lat_polea:['Elevación lateral en polea',1,'S',45,'Deltoides lateral','De lado a la polea baja, agarre con la mano contraria. Eleva el brazo lateralmente hasta la altura del hombro y baja lento.',['Codo ligeramente flexionado','Tronco quieto']],
+ gemelo_sentado:['Gemelo sentado en máquina',1,'U',45,'Sóleo (clave para correr)','Sentado con las almohadillas sobre los muslos y la punta de los pies en el apoyo. Baja los talones y sube al máximo.',['Rango completo','Pausa arriba']],
+ talones_1p:['Elevación de talones a una pierna',1,'D',45,'Gemelo, sóleo, estabilidad de tobillo','En un escalón sobre una pierna, apoyándote con una mano. Baja el talón y sube al máximo. Puedes sujetar una mancuerna.',['Sube recto, sin girar el tobillo','Rango completo']],
+ pallof_banda:['Pallof con banda',0,null,45,'Core antirrotación','Igual que en polea pero con una banda anclada a la altura del pecho.',['Cadera al frente','Lento']],
+ lenador:['Leñador en polea (woodchopper)',1,'S',45,'Oblicuos, core','Polea alta a un lado. Tira en diagonal hacia la cadera contraria girando desde el tronco con brazos casi estirados.',['Gira desde el tronco y la cadera','Controla la vuelta']],
+ split_sq:['Split squat (zancada estática)',1,'D',75,'Cuádriceps, glúteo','Piernas en posición de zancada fija. Baja recto hasta que la rodilla trasera casi toque el suelo y sube. Con mancuernas si quieres.',['Tronco recto','Rodilla delantera sobre el pie']],
+ smith_zancada:['Zancada en multipower',1,'L',90,'Cuádriceps, glúteo','En posición de zancada bajo la barra guiada. Baja hasta casi tocar el suelo con la rodilla trasera y sube.',['Pie delantero adelantado','Tronco recto']],
+ rot_ext_lado:['Rotación externa tumbado de lado',1,'S',45,'Manguito rotador','Tumbado de lado, codo pegado al costado a 90° con una mancuerna ligera. Rota el antebrazo hacia arriba y baja lento.',['Codo fijo','1–3 kg es suficiente']],
+ suitcase:['Sostén de maleta (suitcase hold)',1,'D',30,'Oblicuos, cuadrado lumbar, agarre','De pie con una mancuerna o kettlebell pesada en una mano. Mantén el tronco recto sin inclinarte hacia el peso. Puedes caminar.',['Hombros nivelados','Abdomen firme']],
+ plancha_lat_rod:['Plancha lateral con rodillas',0,null,30,'Oblicuos, glúteo medio','Plancha lateral apoyando rodillas (flexionadas) en lugar de pies. Versión más fácil.',['Cadera alta','Cuerpo alineado']],
+ press_incl_smith:['Press inclinado en multipower',1,'U',90,'Pectoral superior, tríceps','Banco a 30° bajo la barra guiada. Baja a la parte alta del pecho y empuja.',['Escápulas juntas','Codos a ~45°']],
+ superman:['Superman alterno',0,null,30,'Erectores, glúteo','Boca abajo, eleva a la vez brazo y pierna contrarios unos centímetros, pausa y alterna.',['Mirada al suelo','Movimiento corto y controlado']]
+};
+const CAT={};
+for(const [id,[n,w,c,rest,m,how,k]] of Object.entries(NEWX)){EX[id]=[n,w,rest];DESC[id]={m,c:how,k,x:null};CAT[id]=c}
+// Variantes disponibles para cada ejercicio del plan (la primera opción es siempre el original)
+const VAR={
+ goblet:['goblet_maq','smith_sq','sentadilla'],
+ sentadilla:['sentadilla_maq','goblet_maq','smith_sq','goblet'],
+ remo_mb:['remo_mb_maq','remo_polea1','remo_pecho','remo_polea'],
+ remo_pecho:['remo_pecho_maq','remo_mb','remo_polea','remo_barra'],
+ remo_polea:['remo_pecho_maq','remo_polea1','remo_mb','remo_barra'],
+ press_mil_mb:['press_mil_mb_maq','smith_press','arnold','landmine'],
+ press_mil:['press_mil_maq','press_mil_mb','smith_press','landmine'],
+ arnold:['arnold_maq','press_mil_mb','landmine'],
+ puente:['puente_maq','puente_barra','puente_1p'],
+ hip_thrust:['hip_thrust_maq','puente_barra','puente_1p'],
+ facepull:['fp_banda','pajaros_mb','ytw_maq'],
+ ytw:['ytw_maq','pajaros_mb','facepull'],
+ plancha:['hollow','plancha_fitball'],
+ pmr_mb:['pmr_mb_maq','pmr_1p','curl_fem','pmr'],
+ pmr:['pmr_maq','pmr_mb','pmr_1p','curl_fem'],
+ jalon:['jalon_neutro','dominada','pullover_polea'],
+ dominada:['jalon','jalon_neutro','pullover_polea'],
+ press_banca_mb:['press_banca_mb_maq','banca_barra','flexiones','press_incl'],
+ press_incl:['press_incl_maq','press_incl_smith','press_banca_mb'],
+ laterales:['laterales_maq','lat_polea'],
+ talones:['talones_maq','gemelo_sentado','talones_1p'],
+ pallof:['pallof_banda','lenador'],
+ zancada_inv:['zancada_inv_maq','split_sq','smith_zancada','stepup'],
+ stepup:['stepup_maq','zancada_inv','split_sq','bulgara'],
+ bulgara:['bulgara_maq','split_sq','zancada_inv','smith_zancada'],
+ rot_ext:['rot_ext_lado','fp_banda'],
+ plancha_lat:['plancha_lat_rod','suitcase'],
+ birddog:['deadbug','superman'],
+ deadbug:['birddog','plancha_toques']
+};
 
 const DAYS=[{k:'lun',n:'Lunes',o:0},{k:'mar',n:'Martes',o:1},{k:'mie',n:'Miércoles',o:2},{k:'jue',n:'Jueves',o:3}];
 
@@ -226,8 +303,10 @@ function phase(w){
  const b=Math.floor((w-3)/4)+1, bw=(w-3)%4+1, type=b%2?'base':'fuerza';
  return {fb:false,b,bw,type,label:`Bloque ${b} · ${type==='base'?'Base':'Fuerza'} · sem ${bw}/4`};
 }
+let _lg=null;
+function curVar(id,lg){const v=(lg&&lg.var&&lg.var[id])||S.alt[id];return (v&&VAR[id]&&VAR[id].includes(v))?v:id}
 function session(w,d){
- const p=phase(w);
+ const p=phase(w);_lg=S.logs[w+'-'+d];
  if(d==='mie'){
   const r=p.fb?RUN.fb[w-1]:RUN.blk[p.bw-1];
   return {run:true,t:'Carrera',desc:r,p,rt:'run'};
@@ -247,7 +326,7 @@ function session(w,d){
   })};
 }
 function mk(id,s,r,main){
- const eid=(S.alt[id]&&ALT[id])?id+'_maq':id, e=EX[eid], def=main?Math.max(e[2],150):e[2];
+ const eid=curVar(id,_lg), e=EX[eid], def=main?Math.max(e[2],150):e[2];
  return {id:eid,base:id,name:e[0],w:!!e[1],def,rest:S.rest[eid]||def,s,r,main};
 }
 
@@ -256,7 +335,7 @@ const KEY='gymapp-v1';
 let S;
 try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){}
 if(!S) S={start:mondayOf(new Date()),logs:{}};
-function norm(){S.alt=S.alt||{};S.rest=S.rest||{}}
+function norm(){S.alt=S.alt||{};S.rest=S.rest||{};for(const k in S.alt){if(S.alt[k]===true)S.alt[k]=k+'_maq';else if(!S.alt[k])delete S.alt[k]}}
 norm();
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){alert('No se pudo guardar: '+e.message)}}
 if(navigator.storage&&navigator.storage.persist) navigator.storage.persist();
@@ -278,17 +357,34 @@ let tab='hoy', sel=todaySel(), planW=sel.w;
 const key=(w,d)=>w+'-'+d;
 function getLog(k,create){if(!S.logs[k]&&create)S.logs[k]={sets:{},note:''};return S.logs[k]}
 
+function isDeload(w){const p=phase(+w);return !p.fb&&p.bw===4}
 function lastFor(exId,curK){
- let best=null;
+ let best=null,bestDl=null;
  for(const [k,l] of Object.entries(S.logs)){
   if(k===curK||!l.sets||!l.sets[exId]) continue;
   const done=l.sets[exId].filter(x=>x&&x.d);
   if(!done.length) continue;
-  const ts=l.ts||0;
-  if(!best||ts>best.ts) best={ts,sets:done,date:l.date};
+  const ts=l.ts||0, r={ts,sets:done,date:l.date,rate:l.rate?l.rate[exId]:undefined};
+  if(isDeload(k.split('-')[0])){if(!bestDl||ts>bestDl.ts)bestDl=r}
+  else if(!best||ts>best.ts) best=r;
  }
- return best;
+ return best||bestDl;
 }
+/* ===== Valoración y progresión de carga ===== */
+// 0 = Al límite (mantener) · 1 = Justo (subir poco) · 2 = Fácil (subir medio) · 3 = Sobrado (subir mucho)
+const RATES=[['Al límite','mantén'],['Justo','sube poco'],['Fácil','sube medio'],['Sobrado','sube mucho']];
+const INC={L:[0,2.5,5,10],U:[0,1.25,2.5,5],D:[0,1,2,4],S:[0,0.5,1,2]};
+function incCat(eid){
+ if(!EX[eid]||!EX[eid][1])return null;
+ if(eid in CAT)return CAT[eid];
+ const b=eid.replace('_maq',''),maq=eid!==b;
+ if(['laterales','facepull','rot_ext','ytw','pallof'].includes(b))return 'S';
+ if(['pmr','pmr_mb'].includes(b)&&maq)return 'D';
+ if(['sentadilla','pmr','hip_thrust'].includes(b)||(maq&&['goblet','bulgara','zancada_inv','stepup','puente','talones'].includes(b)))return 'L';
+ if(['press_mil','jalon','remo_polea','dominada'].includes(b)||maq)return 'U';
+ return 'D';
+}
+const r4=x=>Math.round(x*4)/4, kg=x=>String(x).replace('.',',');
 function topW(sets){let m=null;for(const s of sets){const v=parseFloat(String(s.w).replace(',','.'));if(!isNaN(v)&&(m===null||v>m))m=v}return m}
 
 /* ===== Vistas ===== */
@@ -307,6 +403,10 @@ function chkHTML(x,sides,timed){
   return `<button class="chk ${on?'on':''} ${run?'run':''} ${sides?'two':''}" data-side="${sd}">${on?'✓':(run?'■':(timed?'▶':(sides?'':'✓')))}${sides?`<small>${lab}</small>`:''}</button>`};
  return sides?one('I','Izq')+one('D','Der'):one('','');
 }
+function rateHTML(eid,l,cat){
+ const cur=l&&l.rate?l.rate[eid]:undefined;
+ return `<div class="rate"><div class="sub">¿Cómo ha ido? La próxima vez…</div><div class="rbtns" data-rate="${eid}">${RATES.map(([a,b],v)=>`<button data-rv="${v}" class="${cur===v?'on':''}"><b>${a}</b><small>${cat?(v?'+'+kg(INC[cat][v])+' kg':'= peso'):b}</small></button>`).join('')}</div></div>`;
+}
 function vHoy(){
  const {w,d}=sel, s=session(w,d), k=key(w,d), l=getLog(k), dn=DAYS.find(z=>z.k===d).n;
  let h=`<div class="weeknav"><button data-nav="-1">‹</button><div style="text-align:center"><div class="sub">Semana ${w} · ${fmt(dateFor(w,d))}</div><b>${dn}</b></div><button data-nav="1">›</button></div>
@@ -324,10 +424,16 @@ function vHoy(){
    const sets=(l&&l.sets[e.id])||[], last=lastFor(e.id,k), n=nSets(l,e.id,e.s);
    const sides=/lado/.test(e.r), timed=/\d\s*s(\b|\/)/.test(e.r);
    const lastTxt=last?`Última vez: ${last.sets.map(x=>(x.w?x.w+'×':'')+(x.r||'?')).join(' · ')}`:'Sin registros previos';
-   const lastW=i=>{if(!last)return'';const x=last.sets[i]||last.sets[last.sets.length-1];return x.w||''};
-   const seg=ALT[e.base]?`<div class="seg"><button data-alt="${e.base}" data-v="0" class="${e.id===e.base?'on':''}">Peso libre</button><button data-alt="${e.base}" data-v="1" class="${e.id!==e.base?'on':''}">Máquina</button></div>`:'';
+   const cat=incCat(e.id), dl=isDeload(w), rate=last&&last.rate!=null?+last.rate:null, inc=(cat&&rate!=null&&!dl)?INC[cat][rate]:0;
+   const lastW=i=>{if(!last)return'';const x=last.sets[i]||last.sets[last.sets.length-1];const v=parseFloat(String(x.w||'').replace(',','.'));if(isNaN(v))return x.w||'';const st={L:2.5,U:2.5,D:1,S:0.5}[cat]||0.5;return String(dl?Math.round(v*0.6/st)*st:r4(v+inc))};
+   let hint='';
+   if(last&&e.w&&dl)hint='Semana de descarga: peso sugerido ≈60% de la última vez.';
+   else if(rate!=null)hint=`Valoraste <b>${RATES[rate][0]}</b> → ${!e.w?(rate?'añade algo de tiempo o repeticiones':'mantén'):(inc?`hoy <b>+${kg(inc)} kg</b> (ya aplicado)`:'mantén el peso')}.`;
+   const used=new Set(s.items.map(x=>x.id));
+   const opts=VAR[e.base]?[e.base,...VAR[e.base]]:null, pinned=curVar(e.base,null);
+   const seg=opts?`<div class="var"><span>🔁</span><select data-var="${e.base}">${opts.map(o=>`<option value="${o}" ${o===e.id?'selected':''} ${o!==e.id&&used.has(o)?'disabled':''}>${EX[o][0]}${o===e.base?' (plan)':''}</option>`).join('')}</select><button class="pin ${pinned===e.id&&e.id!==e.base?'on':''}" data-pin="${e.base}" data-v="${e.id}" ${e.id===e.base&&pinned===e.base?'hidden':''}>${pinned===e.id?'📌 Habitual':'📌 Fijar'}</button></div>`:'';
    h+=`<div class="card"><div class="exh"><b>${e.name} <button class="info" data-info="${e.id}" aria-label="Cómo se hace">ⓘ</button></b><span class="tgt">${n} × ${e.r}</span></div>${seg}${descHTML(e.id,open.has(e.id))}
-   <div class="meta"><span class="last">${lastTxt}</span></div><label class="rest">⏱ Descanso entre series <input data-restin="${e.id}" inputmode="numeric" value="${e.rest}" placeholder="${e.def}"> s</label>${sides?'<div class="sub" style="font-size:12px;margin:-2px 0 6px">El descanso empieza al completar ambos lados.</div>':''}`;
+   <div class="meta"><span class="last">${lastTxt}</span></div>${hint?`<div class="hint">${hint}</div>`:''}<label class="rest">⏱ Descanso entre series <input data-restin="${e.id}" inputmode="numeric" value="${e.rest}" placeholder="${e.def}"> s</label>${sides?'<div class="sub" style="font-size:12px;margin:-2px 0 6px">El descanso empieza al completar ambos lados.</div>':''}`;
    const w0=sets[0]&&sets[0].w;
    for(let i=0;i<n;i++){
     const x=sets[i]||{};
@@ -338,7 +444,7 @@ function vHoy(){
      `<div class="fld"><input inputmode="numeric" placeholder="${parseInt(e.r)||''}" data-ex="${e.id}" data-i="${i}" data-f="r" value="${esc(x.r)}"><span>${timed?'s':'reps'}${sides?'/lado':''}</span></div>`+
      `<div class="chks" data-ex="${e.id}" data-i="${i}" data-tr="${parseInt(e.r)||''}" data-sides="${sides?1:0}" data-timed="${timed?1:0}" data-name="${esc(e.name)}">${chkHTML(x,sides,timed)}</div></div>`;
    }
-   h+=`<div class="setbtns"><button class="mini" data-rm="${e.id}" data-n="${n}" ${n<=1?'disabled':''}>− Quitar serie</button><button class="mini" data-add="${e.id}" data-n="${n}">+ Añadir serie</button></div></div>`;
+   h+=`<div class="setbtns"><button class="mini" data-rm="${e.id}" data-n="${n}" ${n<=1?'disabled':''}>− Quitar serie</button><button class="mini" data-add="${e.id}" data-n="${n}">+ Añadir serie</button></div>${rateHTML(e.id,l,cat)}</div>`;
   }
   h+=`${routine('cd',s.rt,l)}<label>Notas de la sesión</label><textarea data-note>${esc(l&&l.note)}</textarea>`;
  }
@@ -349,11 +455,11 @@ const open=new Set();
 function descHTML(id,show){
  const d=DESC[id];if(!d)return'';
  const q=encodeURIComponent(EX[id][0]+' técnica');
- const alt=ALT[id]?`<p class="altn"><b>Alternativa en máquina:</b> ${ALT[id][0]}. ${ALT[id][1]}</p>`:'';
+ const alt=VAR[id]?`<p class="altn"><b>Alternativas:</b> ${VAR[id].map(v=>EX[v][0]).join(' · ')}</p>`:'';
  return `<div class="desc" id="d-${id}" ${show?'':'hidden'}><div class="mus">${d.m}</div><p>${d.c}</p><ul>${d.k.map(x=>`<li>${x}</li>`).join('')}</ul>${d.x?`<p class="err"><b>Evita:</b> ${d.x}</p>`:''}${tab==='plan'?alt:''}<a href="https://www.youtube.com/results?search_query=${q}" target="_blank" rel="noopener">▶ Ver vídeos de técnica</a></div>`;
 }
 function vEx(){
- const ids=Object.keys(EX).filter(i=>!i.endsWith('_maq')).sort((a,b)=>EX[a][0].localeCompare(EX[b][0],'es'));
+ const ids=Object.keys(EX).filter(i=>!i.endsWith('_maq')&&!(i in NEWX)).sort((a,b)=>EX[a][0].localeCompare(EX[b][0],'es'));
  let h=`<button class="mini" data-back>‹ Volver al plan</button><h1>Ejercicios</h1><p class="sub">Toca un ejercicio para ver cómo se hace.</p>`;
  for(const id of ids)h+=`<div class="card"><div class="exh"><b>${EX[id][0]} <button class="info" data-info="${id}">ⓘ</button></b></div>${descHTML(id,open.has(id))}</div>`;
  app.innerHTML=h;
@@ -421,7 +527,7 @@ function vAjustes(){
  <button class="btn sec" data-imp>Importar texto pegado</button>
  <h2>Zona peligrosa</h2>
  <button class="btn sec" data-reset style="color:#ff6b6b">Borrar todos los datos</button>
- <p class="sub" style="margin-top:16px">Versión 1.4</p>`;
+ <p class="sub" style="margin-top:16px">Versión 1.6</p>`;
 }
 
 /* ===== Eventos ===== */
@@ -443,12 +549,13 @@ app.addEventListener('change',e=>{
  const t=e.target;
  if('start' in t.dataset&&t.value){S.start=mondayOf(parse(t.value));save();sel=todaySel();planW=sel.w;render()}
  if('hx' in t.dataset){histEx=t.value;vHist()}
+ if(t.dataset.var){const l=getLog(key(sel.w,sel.d),true);l.var=l.var||{};l.var[t.dataset.var]=t.value;save();const y=scrollY;vHoy();scrollTo(0,y);return}
  if('snd' in t.dataset){S.snd=t.checked;save()}
  if('loud' in t.dataset){S.loud=t.checked;save();setAudioSession()}
  if('impf' in t.dataset&&t.files[0]){t.files[0].text().then(doImport)}
 });
 app.addEventListener('click',e=>{
- const b=e.target.closest('[data-test],[data-side],[data-rm],[data-alt],[data-rt],[data-rti],[data-info],[data-exlist],[data-back],[data-chk],[data-add],[data-nav],[data-pw],[data-go],[data-fin],[data-exp],[data-imp],[data-reset]');if(!b)return;
+ const b=e.target.closest('[data-pin],[data-rv],[data-test],[data-side],[data-rm],[data-alt],[data-rt],[data-rti],[data-info],[data-exlist],[data-back],[data-chk],[data-add],[data-nav],[data-pw],[data-go],[data-fin],[data-exp],[data-imp],[data-reset]');if(!b)return;
  if(b.dataset.rt){const body=b.nextElementSibling;body.hidden=!body.hidden;rtOpen[b.dataset.rt]=!body.hidden;b.lastElementChild.textContent=body.hidden?'▾':'▴';return}
  if(b.dataset.rti){
   unlockAudio();
@@ -459,11 +566,16 @@ app.addEventListener('click',e=>{
   if(st[i]&&+b.dataset.s)startTimer(+b.dataset.s);
   return;
  }
- if(b.dataset.alt){const y=scrollY;S.alt[b.dataset.alt]=b.dataset.v==='1';save();vHoy();scrollTo(0,y);return}
+ if(b.dataset.pin){const id=b.dataset.pin,v=b.dataset.v;if(S.alt[id]===v||v===id)delete S.alt[id];else S.alt[id]=v;save();const y=scrollY;vHoy();scrollTo(0,y);return}
  if(b.dataset.info){e.stopPropagation();const id=b.dataset.info,el=b.closest('.card').querySelector('.desc');if(!el)return;el.hidden=!el.hidden;el.hidden?open.delete(id):open.add(id);return}
  if('exlist' in b.dataset){vEx();window.scrollTo(0,0);return}
  if('back' in b.dataset){vPlan();window.scrollTo(0,0);return}
  const k=key(sel.w,sel.d);
+ if(b.dataset.rv!==undefined){
+  const box=b.closest('.rbtns'),eid=box.dataset.rate,v=+b.dataset.rv,l=getLog(key(sel.w,sel.d),true);l.rate=l.rate||{};
+  if(l.rate[eid]===v)delete l.rate[eid];else l.rate[eid]=v;touch(l);save();
+  box.querySelectorAll('button').forEach(x=>x.classList.toggle('on',+x.dataset.rv===l.rate[eid]));return;
+ }
  if('test' in b.dataset){unlockAudio();play('end');return}
  if(b.dataset.side!==undefined&&b.closest('.chks')){
   const c=b.closest('.chks'),eid=c.dataset.ex,i=+c.dataset.i,sd=b.dataset.side,timed=c.dataset.timed==='1';
