@@ -14,9 +14,9 @@
 <style>
 :root{--bg:#111317;--card:#1b1e24;--card2:#23272f;--txt:#eef0f3;--mut:#9aa3ae;--acc:#ff8a3d;--ok:#3ecf8e;--line:#2d323b}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{overflow-x:hidden;margin:0;background:var(--bg);color:var(--txt);font:16px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+html,body{margin:0;background:var(--bg);color:var(--txt);font:16px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
 body{padding:env(safe-area-inset-top) 0 calc(76px + env(safe-area-inset-bottom))}
-main{padding:12px 16px 90px;max-width:640px;margin:0 auto}
+main{padding:12px 16px 90px;max-width:640px;margin:0 auto;overflow-x:clip;min-width:0}
 h1{font-size:22px;margin:6px 0 2px}
 h2{font-size:17px;margin:18px 0 8px}
 .sub{color:var(--mut);font-size:14px}
@@ -81,11 +81,11 @@ button{font-family:inherit}
 .row{display:flex;gap:8px}
 .row>*{flex:1}
 .mini{background:none;border:0;color:var(--acc);font-size:14px;padding:6px 0}
-nav{position:fixed;left:0;right:0;bottom:0;background:#0c0d10;border-top:1px solid var(--line);display:flex;padding-bottom:env(safe-area-inset-bottom);z-index:5}
+nav{position:fixed;left:0;right:0;bottom:0;transform:translateZ(0);-webkit-transform:translateZ(0);background:#0c0d10;border-top:1px solid var(--line);display:flex;padding-bottom:env(safe-area-inset-bottom);z-index:5}
 nav button{flex:1;background:none;border:0;color:var(--mut);padding:10px 0 12px;font-size:12px}
 nav button i{display:block;font-style:normal;font-size:20px}
 nav button.on{color:var(--acc)}
-#timer{position:fixed;left:12px;right:12px;bottom:calc(70px + env(safe-area-inset-bottom));background:var(--acc);color:#1a0d02;border-radius:14px;padding:10px 12px;display:none;align-items:center;gap:8px;z-index:6;box-shadow:0 6px 20px #0008}
+#timer{position:fixed;transform:translateZ(0);-webkit-transform:translateZ(0);left:12px;right:12px;bottom:calc(70px + env(safe-area-inset-bottom));background:var(--acc);color:#1a0d02;border-radius:14px;padding:10px 12px;display:none;align-items:center;gap:8px;z-index:6;box-shadow:0 6px 20px #0008}
 #timer.show{display:flex}
 #timer b{font-size:24px;font-variant-numeric:tabular-nums}
 #timer button{background:#0002;border:0;border-radius:8px;padding:8px 10px;font-size:15px;color:#1a0d02;font-weight:600}
@@ -671,7 +671,7 @@ function vAjustes(){
  <button class="btn sec" data-imp>Importar texto pegado</button>
  <h2>Zona peligrosa</h2>
  <button class="btn sec" data-reset style="color:#ff6b6b">Borrar todos los datos</button>
- <p class="sub" style="margin-top:16px">Versión 1.8</p>`;
+ <p class="sub" style="margin-top:16px">Versión 1.8.1</p>`;
 }
 
 /* ===== Eventos ===== */
